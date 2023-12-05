@@ -223,7 +223,7 @@ forca_f: forca port map (chute,botao,reset,clkm,ledvidas,comp,gpsig);
 		if (comp(4) = '1') then
 			DB <= X"37"; --7
 		else
-			DB <= X"2D"; 
+			DB <= X"2D"; -- _
 		end if;
 		nx_state <= WriteData3; 
 		
@@ -232,34 +232,34 @@ forca_f: forca port map (chute,botao,reset,clkm,ledvidas,comp,gpsig);
 		if (comp(3) = '1') then
 			DB <= X"31"; --1
 		else
-			DB <= X"2D"; 
+			DB <= X"2D"; -- _
 		end if;     
 		nx_state  <= WriteData4; 
 		
 		when  WriteData4   =>
 		RS<=   '1';   RW<=   '0';
 		if (comp(2) = '1') then
-			DB <= X"36";
+			DB <= X"36"; --6
 		else
-			DB <= X"2D"; 
+			DB <= X"2D"; -- _
 		end if;
 		nx_state  <= WriteData5; 
 
 		when  WriteData5   =>
 		RS<=   '1';   RW<=   '0';
 		if (comp(1) = '1') then
-			DB <= X"35";
+			DB <= X"35"; --5
 		else
-			DB <= X"2D"; 
+			DB <= X"2D"; -- _
 		end if;
 		nx_state  <= WriteData6;
 		
 		when  WriteData6   =>
 		RS<=   '1';   RW<=   '0';
 		if (comp(0) = '1') then
-			DB <= X"30";
+			DB <= X"30"; --0
 		else
-			DB <= X"2D"; 
+			DB <= X"2D"; -- _
 		end if;
 		nx_state  <= SetAddress;
 	
