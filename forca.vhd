@@ -45,7 +45,7 @@ signal senha0: STD_LOGIC_VECTOR (2 downto 0) := "000";
 signal comp: STD_LOGIC_VECTOR(4 downto 0):= "00000";            --Vetor que contém quais posições da senha já foram acertadas pelo jogador (1 se já foi acertado, 0 caso ainda não)
 signal comp0,comp1,comp2,comp3,comp4, bait : STD_LOGIC := '0';  --Signals auxiliares que mostram quais posições da senha já foram acertadas, para composição do vetor comp
 signal estados: STD_LOGIC_VECTOR(2 downto 0):= "000";           --Estados do jogo. Sua codificação está abaixo 
-signal vidas : integer range 3 downto 0 := 3;                    					 --Quantidade de vidas que o jogador possui: diminui em 1 a cada erro realizado
+signal vidas : integer range 3 downto 0 := 3;                   --Quantidade de vidas que o jogador possui: diminui em 1 a cada erro realizado
 signal gpsig : STD_LOGIC_VECTOR(1 downto 0):= "00"; 
 
 
@@ -66,11 +66,11 @@ process(vidas)
 
 begin
 	if (vidas = 3) then            --Configuração das saídas de LED de acordo com a
-		vidasled <= "111";          --quantidade de vidas que o jogador possui: a
+		vidasled <= "111";     --quantidade de vidas que o jogador possui: a
 	elsif (vidas = 2) then         --quantidade de vidas é igual à quantidade de
-		vidasled <= "011";          --LEDS acesos. Caso não haja nenhum LED aceso,
+		vidasled <= "011";     --LEDS acesos. Caso não haja nenhum LED aceso,
 	elsif (vidas = 1) then         --as vidas do jogador acabaram e o jogo se encerra
-		vidasled <= "001";          --com a sua derrota 
+		vidasled <= "001";     --com a sua derrota 
 	elsif (vidas = 0) then
 		vidasled <= "000";
 	end if;
@@ -82,7 +82,7 @@ begin
 		case estados is
 			when "000" =>                      --realiza o reset do jogo, caso o botão tenha sido ativado, e a comparação do chute com os algarismos da senha
 				if (reset = '1') then 
-					vidas <= 3;          		  --Caso o reset tenha sido ativado, as todas as 
+					vidas <= 3;          	     --Caso o reset tenha sido ativado, as todas as 
 					comp <= "00000";             --vidas e acertos do jogador devem ser reiniciados 
 					comp0 <= '0';
 					comp1 <= '0';
@@ -91,7 +91,7 @@ begin
 					comp4 <= '0';
 					estados <= "000";
 					gpsig <= "00";
-				elsif (botao = '1' AND vidas > 0) then        --Comparação de cada alagarismo da senha com o 
+				elsif (botao = '1' AND vidas > 0) then             --Comparação de cada alagarismo da senha com o 
 					if (chute = senha0) then                   --chute feito pelo jogador
 						comp0 <= '1';
 					end if;
@@ -118,7 +118,7 @@ begin
 					estados <= "100"; --Errou
 				end if;
 				
-			when "010" =>                      --Houve Acerto: Salvar os bits já acertados
+			when "010" =>                           --Houve Acerto: Salvar os bits já acertados
 				comp(0) <= comp0 or comp(0);    --no vetor "comp"
 				comp(1) <= comp1 or comp(1);
 				comp(2) <= comp2 or comp(2);
