@@ -37,8 +37,8 @@ generic (fclk: natural := 110_000_000); -- 50MHz , cristal do kit EE03
 				clk   : in STD_LOGIC;
 				ledvidas:  out std_logic_vector(2 downto 0); 
 				RS, RW      : out bit;
-		      E           : buffer bit;  
-		      DB          : out bit_vector(7 downto 0)); 
+		     		E           : buffer bit;  
+		      		DB          : out bit_vector(7 downto 0)); 
 end LCD;
 
 architecture arq_LCD of LCD is
