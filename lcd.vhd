@@ -30,7 +30,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity LCD is
-generic (fclk: natural := 150_000_000); -- 50MHz , cristal do kit EE03
+generic (fclk: natural := 110_000_000); -- 50MHz , cristal do kit EE03
 		port (chute : in STD_LOGIC_VECTOR (2 downto 0);
 				botao : in STD_LOGIC;
 				reset : in STD_LOGIC;
@@ -51,29 +51,31 @@ architecture arq_LCD of LCD is
 	signal pr_state, nx_state: state; 
 	signal comp : std_logic_vector(4 downto 0);   --signal do vetor que apresenta quais os algarismos da senha já foram acertados
 	signal gpsig : std_logic_vector(1 downto 0);  --signal do vetor gp. Caso gp(1)=1, o jogador ganhou o jogo; caso gp=0, o jogador perdeu o jogo
-		
+	signal clkm : std_logic;
+	
 Component forca is
-    Port ( entrada : in  STD_LOGIC_VECTOR (2 downto 0);    
+    Port ( chute : in  STD_LOGIC_VECTOR (2 downto 0);    
            botao : in  STD_LOGIC;
 			  reset : in std_logic;
 			  clk   : in std_logic;
-			  ledvidas: out std_logic_vector(2 downto 0);
+			  vidasled: out std_logic_vector(2 downto 0);
 			  compfinal: out STD_LOGIC_VECTOR(4 downto 0);
 			  gp : out std_logic_vector(1 downto 0)
 			  );
 end component;
 begin
 
-forca_f: forca port map (chute,botao,reset,clk,ledvidas,comp,gpsig);
+forca_f: forca port map (chute,botao,reset,clkm,ledvidas,comp,gpsig);
 
 ---—Clock generator (E->500Hz) :---------
 		process (clk)
-		variable count: natural range 0 to fclk/1000; 
+		variable count: natural range 0 to fclk/100; 
 		begin
 			if (clk' event and clk = '1') then 
 				count := count + 1;
-				if (count=fclk/1000) then 
+				if (count=fclk/100) then 
 				 E <= not E; 
+				 clkm <= NOT clkm;
 				 count := 0; 
 				end if; 
 			end if; 
@@ -219,45 +221,45 @@ forca_f: forca port map (chute,botao,reset,clk,ledvidas,comp,gpsig);
 		when WriteData2 =>
 		RS<= '1'; RW<= '0';
 		if (comp(4) = '1') then
-			DB <= X"07";
+			DB <= X"37"; --7
 		else
-			DB <= X"5F"; 
+			DB <= X"2D"; 
 		end if;
 		nx_state <= WriteData3; 
 		
 		when WriteData3 =>
 		RS<= '1'; RW<= '0';
 		if (comp(3) = '1') then
-			DB <= X"01";
+			DB <= X"31"; --1
 		else
-			DB <= X"5F"; 
+			DB <= X"2D"; 
 		end if;     
 		nx_state  <= WriteData4; 
 		
 		when  WriteData4   =>
 		RS<=   '1';   RW<=   '0';
 		if (comp(2) = '1') then
-			DB <= X"06";
+			DB <= X"36";
 		else
-			DB <= X"5F"; 
+			DB <= X"2D"; 
 		end if;
 		nx_state  <= WriteData5; 
 
 		when  WriteData5   =>
 		RS<=   '1';   RW<=   '0';
 		if (comp(1) = '1') then
-			DB <= X"05";
+			DB <= X"35";
 		else
-			DB <= X"5F"; 
+			DB <= X"2D"; 
 		end if;
 		nx_state  <= WriteData6;
 		
 		when  WriteData6   =>
 		RS<=   '1';   RW<=   '0';
 		if (comp(0) = '1') then
-			DB <= X"00";
+			DB <= X"30";
 		else
-			DB <= X"5F"; 
+			DB <= X"2D"; 
 		end if;
 		nx_state  <= SetAddress;
 	
@@ -268,67 +270,67 @@ forca_f: forca port map (chute,botao,reset,clk,ledvidas,comp,gpsig);
 
 		when  WriteData7   =>
 		RS<=   '1';   RW<=   '0';
-		if (gpsig(1) = '1') then
-			DB <= X"47";
-		elsif (gpsig(0) = '1') then
-			DB <= X"50";
+		if (gpsig = "00") then
+			DB <= X"20"; -- espaço
+		elsif (gpsig = "01") then
+			DB <= X"50"; --P
 		else
-			DB <= X"20";
+			DB <= X"47"; --G
 		end if;
 		nx_state  <= WriteData8;
 
 		when  WriteData8   =>
 		RS<=   '1';   RW<=   '0';
-		if (gpsig(1) = '1') then
-			DB <= X"61";
-		elsif (gpsig(0) = '1') then
-			DB <= X"65";
+		if (gpsig = "00") then
+			DB <= X"20"; -- espaço
+		elsif (gpsig = "01") then
+			DB <= X"65"; --e
 		else
-			DB <= X"20";
+			DB <= X"61"; --a
 		end if;
 		nx_state  <= WriteData9;
 
 		when WriteData9 =>
 		RS<= '1'; RW<= '0';
-		if (gpsig(1) = '1') then
-			DB <= X"6e";
-		elsif (gpsig(0) = '1') then
-			DB <= X"72";
+		if (gpsig = "00") then
+			DB <= X"20"; -- espaço
+		elsif (gpsig = "01") then
+			DB <= X"72"; --r
 		else
-			DB <= X"20";
+			DB <= X"6e"; --n
 		end if;
 		nx_state <= WriteData10; 
 
 		when WriteData10 =>
 		RS<= '1'; RW<= '0';
-		if (gpsig(1) = '1') then
-			DB <= X"68";
-		elsif (gpsig(0) = '1') then
-			DB <= X"64";
+		if (gpsig = "00") then
+			DB <= X"20"; -- espaço
+		elsif (gpsig = "01") then
+			DB <= X"64"; --d
 		else
-			DB <= X"20";
+			DB <= X"68"; --h
 		end if;
 		nx_state <= WriteData11; 
 
 		when WriteData11 =>
 		RS<= '1'; RW<= '0';
-		if (gpsig(1) = '1') then
-			DB <= X"6f";
-		elsif (gpsig(0) = '1') then
-			DB <= X"65";
+		if (gpsig = "00") then
+			DB <= X"20"; -- espaço
+		elsif (gpsig = "01") then
+			DB <= X"65"; --e
 		else
-			DB <= X"20";
+			DB <= X"6f"; --o
 		end if;
 		nx_state <= WriteData12;
 
 		when WriteData12 =>
 		RS<= '1'; RW<= '0';
-		if (gpsig(1) = '1') then
-			DB <= X"75";
-		elsif (gpsig(0) = '1') then
-			DB <= X"75";
+		if (gpsig = "00") then
+			DB <= X"20"; -- espaço
+		elsif (gpsig = "01") then
+			DB <= X"75"; --u
 		else
-			DB <= X"20";
+			DB <= X"75"; --u
 		end if;
 		nx_state <= ReturnHome;
  
