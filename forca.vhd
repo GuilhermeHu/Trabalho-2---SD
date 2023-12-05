@@ -20,31 +20,34 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.std_logic_arith.all;
+use ieee.numeric_std.all;
 
 entity forca is
     Port ( chute : in  STD_LOGIC_VECTOR (2 downto 0);      --Entrada da forca: valor chutado pelo jogador
            botao : in  STD_LOGIC;                          --Botão: confirmação do chute botado nos switchs (input), de modo a mandar o chute ao jogo
 			  reset : in std_logic;                           --Reset: reinicia o jogo inteiro
 			  clk   : in std_logic;                           --Entrada de clock
-			  ledvidas: out std_logic_vector(2 downto 0);     --Saída dos LEDS da placa FPGA, que serão proporcionais às vidas que o jogador possui
-			  compfinal: out STD_LOGIC_VECTOR(4 downto 0);     --Saída de quais posições já foram acertadas pelo jogador, para configuração do print no lcd
+			  vidasled: out std_logic_vector(2 downto 0);     --Saída dos LEDS da placa FPGA, que serão proporcionais às vidas que o jogador possui
+			  compfinal: out STD_LOGIC_VECTOR(4 downto 0);    --Saída de quais posições já foram acertadas pelo jogador, para configuração do print no lcd
 			  gp : out std_logic_vector(1 downto 0)           --Vetor de 2 elementos que apresenta condições para o fim de jogo: gp(1) = g = vitória, e gp(0) = p = derrota
 			  );
 end forca;
 
-architecture arq_forca of forca is
+                                                                                                                                                                                                                                                                                                                                                 architecture arq_forca of forca is
 
 --Sinais temporários:
-signal senha0: STD_LOGIC_VECTOR (2 downto 0) := "111"; -- senha:
-signal senha1: STD_LOGIC_VECTOR (2 downto 0) := "001"; -- 71650
+signal senha4: STD_LOGIC_VECTOR (2 downto 0) := "111"; -- senha:
+signal senha3: STD_LOGIC_VECTOR (2 downto 0) := "001"; -- 71650
 signal senha2: STD_LOGIC_VECTOR (2 downto 0) := "110";
-signal senha3: STD_LOGIC_VECTOR (2 downto 0) := "101";
-signal senha4: STD_LOGIC_VECTOR (2 downto 0) := "000";
+signal senha1: STD_LOGIC_VECTOR (2 downto 0) := "101";
+signal senha0: STD_LOGIC_VECTOR (2 downto 0) := "000";
 
 signal comp: STD_LOGIC_VECTOR(4 downto 0):= "00000";            --Vetor que contém quais posições da senha já foram acertadas pelo jogador (1 se já foi acertado, 0 caso ainda não)
 signal comp0,comp1,comp2,comp3,comp4, bait : STD_LOGIC := '0';  --Signals auxiliares que mostram quais posições da senha já foram acertadas, para composição do vetor comp
 signal estados: STD_LOGIC_VECTOR(2 downto 0):= "000";           --Estados do jogo. Sua codificação está abaixo 
-signal vidas : integer range 3 downto 0:= 3;                    --Quantidade de vidas que o jogador possui: diminui em 1 a cada erro realizado
+signal vidas : integer range 3 downto 0 := 3;                    					 --Quantidade de vidas que o jogador possui: diminui em 1 a cada erro realizado
+signal gpsig : STD_LOGIC_VECTOR(1 downto 0):= "00"; 
+
 
 --Estados:
 -- "000" -> comparação do chute com os bits da senha. Vai para o estado "001", onde tal comparação será analisada.
@@ -63,13 +66,13 @@ process(vidas)
 
 begin
 	if (vidas = 3) then            --Configuração das saídas de LED de acordo com a
-		ledvidas <= "111";          --quantidade de vidas que o jogador possui: a
+		vidasled <= "111";          --quantidade de vidas que o jogador possui: a
 	elsif (vidas = 2) then         --quantidade de vidas é igual à quantidade de
-		ledvidas <= "011";          --LEDS acesos. Caso não haja nenhum LED aceso,
+		vidasled <= "011";          --LEDS acesos. Caso não haja nenhum LED aceso,
 	elsif (vidas = 1) then         --as vidas do jogador acabaram e o jogo se encerra
-		ledvidas <= "001";          --com a sua derrota 
+		vidasled <= "001";          --com a sua derrota 
 	elsif (vidas = 0) then
-		ledvidas <= "000";
+		vidasled <= "000";
 	end if;
 end process;
 
@@ -79,16 +82,15 @@ begin
 		case estados is
 			when "000" =>                      --realiza o reset do jogo, caso o botão tenha sido ativado, e a comparação do chute com os algarismos da senha
 				if (reset = '1') then 
-					vidas <= 3;
-					ledvidas <= "111";           --Caso o reset tenha sido ativado, as todas as 
+					vidas <= 3;          		  --Caso o reset tenha sido ativado, as todas as 
 					comp <= "00000";             --vidas e acertos do jogador devem ser reiniciados 
 					comp0 <= '0';
 					comp1 <= '0';
 					comp2 <= '0';
 					comp3 <= '0';
 					comp4 <= '0';
-					bait <= '0';
 					estados <= "000";
+					gpsig <= "00";
 				elsif (botao = '1' AND vidas > 0) then        --Comparação de cada alagarismo da senha com o 
 					if (chute = senha0) then                   --chute feito pelo jogador
 						comp0 <= '1';
@@ -127,8 +129,13 @@ begin
 				
 			when "011" => --Verificação se o jogador ganhou: todos os algarismos da senha foram acertados (todas comparações foram iguais a 1)
 				--Caso as todos os numeros tenham sido acertados, o jogador ganha; caso contrário, o jogo continua
-				if comp(4 downto 0) = "11111" then
-					gp(1) <= '1'; --Jogador ganhou, print de "Ganhou" no lcd
+					comp0 <= '0';
+					comp1 <= '0';
+					comp2 <= '0';
+					comp3 <= '0';
+					comp4 <= '0';
+				if (comp(4 downto 0) = "11111") then
+					gpsig(1) <= '1'; --Jogador ganhou, print de "Ganhou" no lcd
 					estados <= "000";
 				else
 					estados <= "000";
@@ -141,8 +148,8 @@ begin
 				
 			when "101" => --Verificação se o jogador perdeu: análise da quantidade de vidas do jogador
 				--Caso as vidas tenham acabado, o jogador perde; caso contrário, o jogo continua
-				if vidas = 0 then
-					gp(0) <= '1'; --Jogador perdeu, print de "Perdeu" no lcd
+				if (vidas = 0) then
+					gpsig(0) <= '1'; --Jogador perdeu, print de "Perdeu" no lcd
 					estados <= "000";
 				else
 					estados <= "000";
@@ -154,5 +161,6 @@ begin
 end process;
 
 compfinal <= comp;
+gp <= gpsig;
 
 END arq_forca;
