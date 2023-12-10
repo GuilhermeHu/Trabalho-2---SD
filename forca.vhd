@@ -46,21 +46,21 @@ signal comp: STD_LOGIC_VECTOR(4 downto 0):= "00000";            --Vetor que cont
 signal comp0,comp1,comp2,comp3,comp4, bait : STD_LOGIC := '0';  --Signals auxiliares que mostram quais posições da senha já foram acertadas, para composição do vetor comp
 signal estados: STD_LOGIC_VECTOR(2 downto 0):= "000";           --Estados do jogo. Sua codificação está abaixo* 
 signal vidas : integer range 3 downto 0 := 3;                   --Quantidade de vidas que o jogador possui: diminui em 1 a cada erro realizado
-signal gpsig : STD_LOGIC_VECTOR(1 downto 0):= "00"; 
+signal gpsig : STD_LOGIC_VECTOR(1 downto 0):= "00"; 		--Signal de vetor de 2 elementos que apresenta condições para o fim de jogo: gp(1) = g = vitória, e gp(0) = p = derrota
 
 
 --Estados* :
--- "000" -> comparação do chute com os bits da senha. Vai para o estado "001", onde tal comparação será analisada.
--- "001" -> determinação se a pessoa acertou ao menos alguma coisa (vai para o estado "010") ou se errou (vai para o estado "011")
--- "010" -> o jogador acertou algo: salva os bits acertados no vetor comp. Vai para o estado "011",  onde ocorre a determinação se o jogo acaba ou não (vitória).
+-- "000" -> possui as configurações do reset e realiza a comparação do chute com os algarismos da senha. Vai para o estado "001", onde tal os resultados da comparação serão analisados.
+-- "001" -> determinação se a pessoa acertou algum algarismo (vai para o estado "010") ou se errou o chute (vai para o estado "011")
+-- "010" -> o jogador acertou algo: salva os bits acertados no vetor comp, em seguida, vai para o estado "011",  onde ocorre a determinação se o jogo acaba ou não (vitória).
 -- "011" -> analisa os bits de comp, verificando se o jogador ganhou ou não o jogo (ocorre quando todos os bits de comparação são 1, ou seja, todos foram acertados). Retorna ao estado "000".
--- "100" -> o jogador errou no chute: perda de uma vida. Vai para o estado "101", onde ocorre a determinação se o jogo acaba ou não (derrota).
+-- "100" -> o jogador errou no chute: perda de uma vida, em seguida, vai para o estado "101", onde ocorre a determinação se o jogo acaba ou não (derrota).
 -- "101" -> analisa quantas vidas o jogador possui. Caso a quantidade de vidas tenha chegado a 0, o jogador perde o jogo. Retorna ao estado "000".
 
 
 BEGIN
 
-bait <= (comp0 OR comp1 OR comp2 OR comp3 OR comp4);     --verificação se ocorreu ao menos um acerto por parte do jogador -> OR nos valores de cada comparação
+bait <= (comp0 OR comp1 OR comp2 OR comp3 OR comp4);     --verificação se o chute do jogador foi um acerto ou um erro (algum dos algarismos está certo) -> OR nos valores de cada comparação
 
 process(vidas)
 
@@ -80,11 +80,11 @@ process(clk)
 begin
 	if(rising_edge(clk)) then
 		case estados is
-			when "000" =>                      --realiza o reset do jogo, caso o botão tenha sido ativado, e a comparação do chute com os algarismos da senha
-				if (reset = '1') then 
-					vidas <= 3;          	     --Caso o reset tenha sido ativado, as todas as 
-					comp <= "00000";             --vidas e acertos do jogador devem ser reiniciados 
-					comp0 <= '0';
+			when "000" =>         			--Estado "000": realiza o reset do jogo, caso o botão tenha sido ativado, e a comparação do chute com os algarismos da senha
+				if (reset = '1') then 		
+					vidas <= 3;          	     --Caso o reset tenha sido ativado, todas as vidas
+					comp <= "00000";             --e acertos do jogador devem ser reiniciados, bem 
+					comp0 <= '0';		     --os dados relacionados a esse jogo
 					comp1 <= '0';
 					comp2 <= '0';
 					comp3 <= '0';
@@ -92,10 +92,10 @@ begin
 					estados <= "000";
 					gpsig <= "00";
 				elsif (botao = '1' AND vidas > 0) then             --Comparação de cada alagarismo da senha com o 
-					if (chute = senha0) then                   --chute feito pelo jogador
-						comp0 <= '1';
-					end if;
-					if (chute = senha1) then
+					if (chute = senha0) then                   --chute feito pelo jogador. Caso um algarismo
+						comp0 <= '1';			   --esteja correto, seu respectivo signal virará
+					end if;					   --'1', para composição do vetor comp que diz
+					if (chute = senha1) then		   --quais posições da senha já foram acertadas
 						comp1 <= '1';
 					end if;
 					if (chute = senha2) then
@@ -118,24 +118,23 @@ begin
 					estados <= "100"; --Errou
 				end if;
 				
-			when "010" =>                           --Houve Acerto: Salvar os bits já acertados
-				comp(0) <= comp0 or comp(0);    --no vetor "comp"
-				comp(1) <= comp1 or comp(1);
-				comp(2) <= comp2 or comp(2);
+			when "010" =>                           --Houve Acerto: Salvar os algarismos da senha já acertados
+				comp(0) <= comp0 or comp(0);    --no vetor "comp". Caso uma posição já tenha sido acertada
+				comp(1) <= comp1 or comp(1);	--ela se manterá em nível alto, e o vetor comp só muda com
+				comp(2) <= comp2 or comp(2);	--novos acertos (ou caso o jogo resete).
 				comp(3) <= comp3 or comp(3);
 				comp(4) <= comp4 or comp(4);
 				--Próximo estado
 				estados <= "011";
 				
 			when "011" => --Verificação se o jogador ganhou: todos os algarismos da senha foram acertados (todas comparações foram iguais a 1)
-				--Caso as todos os numeros tenham sido acertados, o jogador ganha; caso contrário, o jogo continua
 					comp0 <= '0';
-					comp1 <= '0';
-					comp2 <= '0';
+					comp1 <= '0';			--Todos os signals auxiliares "comp" da comparação voltam para 0 para a realização
+					comp2 <= '0';			--da próxima rodada, ou seja, comparação do próximo chute do jogador
 					comp3 <= '0';
 					comp4 <= '0';
-				if (comp(4 downto 0) = "11111") then
-					gpsig(1) <= '1'; --Jogador ganhou, print de "Ganhou" no lcd
+				if (comp(4 downto 0) = "11111") then    --Caso as todos os numeros tenham sido acertados, o jogador ganha; caso contrário, o jogo continua
+					gpsig(1) <= '1'; 		--Jogador ganhou, print de "Ganhou" no lcd
 					estados <= "000";
 				else
 					estados <= "000";
@@ -147,8 +146,7 @@ begin
 				estados <= "101";
 				
 			when "101" => --Verificação se o jogador perdeu: análise da quantidade de vidas do jogador
-				--Caso as vidas tenham acabado, o jogador perde; caso contrário, o jogo continua
-				if (vidas = 0) then
+				if (vidas = 0) then	 --Caso as vidas tenham acabado, o jogador perde; caso contrário, o jogo continua
 					gpsig(0) <= '1'; --Jogador perdeu, print de "Perdeu" no lcd
 					estados <= "000";
 				else
