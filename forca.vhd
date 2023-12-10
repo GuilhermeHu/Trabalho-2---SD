@@ -23,14 +23,14 @@ use ieee.std_logic_arith.all;
 use ieee.numeric_std.all;
 
 entity forca is
-    Port ( chute : in  STD_LOGIC_VECTOR (2 downto 0);      --Entrada da forca: valor chutado pelo jogador
-           botao : in  STD_LOGIC;                          --Botão: confirmação do chute botado nos switchs (input), de modo a mandar o chute ao jogo
-			  reset : in std_logic;                           --Reset: reinicia o jogo inteiro
-			  clk   : in std_logic;                           --Entrada de clock
-			  vidasled: out std_logic_vector(2 downto 0);     --Saída dos LEDS da placa FPGA, que serão proporcionais às vidas que o jogador possui
-			  compfinal: out STD_LOGIC_VECTOR(4 downto 0);    --Saída de quais posições já foram acertadas pelo jogador, para configuração do print no lcd
-			  gp : out std_logic_vector(1 downto 0)           --Vetor de 2 elementos que apresenta condições para o fim de jogo: gp(1) = g = vitória, e gp(0) = p = derrota
-			  );
+    Port ( chute : in  STD_LOGIC_VECTOR (2 downto 0);      	--Entrada da forca: algarismo chutado pelo jogador (em binário)
+           botao : in  STD_LOGIC;                         	--Botão: confirmação do chute botado nos switchs (input), de modo a mandar o chute ao jogo
+	   reset : in std_logic;                           	--Reset: reinicia o jogo inteiro
+	   clk   : in std_logic;                           	--Entrada de clock
+	   vidasled: out std_logic_vector(2 downto 0);     	--Saída dos LEDS da placa FPGA, que serão proporcionais às vidas que o jogador possui
+	   compfinal: out STD_LOGIC_VECTOR(4 downto 0);    	--Saída de quais posições já foram acertadas pelo jogador, para configuração do print no lcd
+	   gp : out std_logic_vector(1 downto 0)           	--Vetor de 2 elementos que apresenta condições para o fim de jogo: gp(1) = g = vitória, e gp(0) = p = derrota
+	  );
 end forca;
 
                                                                                                                                                                                                                                                                                                                                                  architecture arq_forca of forca is
@@ -44,12 +44,12 @@ signal senha0: STD_LOGIC_VECTOR (2 downto 0) := "000";
 
 signal comp: STD_LOGIC_VECTOR(4 downto 0):= "00000";            --Vetor que contém quais posições da senha já foram acertadas pelo jogador (1 se já foi acertado, 0 caso ainda não)
 signal comp0,comp1,comp2,comp3,comp4, bait : STD_LOGIC := '0';  --Signals auxiliares que mostram quais posições da senha já foram acertadas, para composição do vetor comp
-signal estados: STD_LOGIC_VECTOR(2 downto 0):= "000";           --Estados do jogo. Sua codificação está abaixo 
+signal estados: STD_LOGIC_VECTOR(2 downto 0):= "000";           --Estados do jogo. Sua codificação está abaixo* 
 signal vidas : integer range 3 downto 0 := 3;                   --Quantidade de vidas que o jogador possui: diminui em 1 a cada erro realizado
 signal gpsig : STD_LOGIC_VECTOR(1 downto 0):= "00"; 
 
 
---Estados:
+--Estados* :
 -- "000" -> comparação do chute com os bits da senha. Vai para o estado "001", onde tal comparação será analisada.
 -- "001" -> determinação se a pessoa acertou ao menos alguma coisa (vai para o estado "010") ou se errou (vai para o estado "011")
 -- "010" -> o jogador acertou algo: salva os bits acertados no vetor comp. Vai para o estado "011",  onde ocorre a determinação se o jogo acaba ou não (vitória).
