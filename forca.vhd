@@ -111,23 +111,23 @@ begin
 					estados <= "001";
 				end if;
 				
-			when "001" => --Verificação se houve acerto ou erro com o chute do jogador
+			when "001" => --Estado "001": Verificação se houve acerto ou erro com o chute do jogador
 				if (bait = '1') then
-					estados <= "010"; --Acertou ao menos algo
+					estados <= "010"; --Acertou ao menos algum algarismo da senha
 				else
 					estados <= "100"; --Errou
 				end if;
 				
-			when "010" =>                           --Houve Acerto: Salvar os algarismos da senha já acertados
-				comp(0) <= comp0 or comp(0);    --no vetor "comp". Caso uma posição já tenha sido acertada
-				comp(1) <= comp1 or comp(1);	--ela se manterá em nível alto, e o vetor comp só muda com
-				comp(2) <= comp2 or comp(2);	--novos acertos (ou caso o jogo resete).
+			when "010" =>                           --Estado "010": Houve Acerto: Salvar os algarismos da senha
+				comp(0) <= comp0 or comp(0);    --já acertados no vetor "comp". Caso uma posição já tenha 
+				comp(1) <= comp1 or comp(1);	--sido acertada ela se manterá em nível alto, e o vetor comp
+				comp(2) <= comp2 or comp(2);	--só muda com novos acertos (ou caso o jogo resete).
 				comp(3) <= comp3 or comp(3);
 				comp(4) <= comp4 or comp(4);
 				--Próximo estado
 				estados <= "011";
 				
-			when "011" => --Verificação se o jogador ganhou: todos os algarismos da senha foram acertados (todas comparações foram iguais a 1)
+			when "011" => --Estado "011": Verificação se o jogador ganhou: todos os algarismos da senha foram acertados (todas comparações foram iguais a 1)
 					comp0 <= '0';
 					comp1 <= '0';			--Todos os signals auxiliares "comp" da comparação voltam para 0 para a realização
 					comp2 <= '0';			--da próxima rodada, ou seja, comparação do próximo chute do jogador
@@ -140,12 +140,12 @@ begin
 					estados <= "000";
 				end if;	
 				
-			when "100" => --Houve Erro: Perde uma vida
+			when "100" => --Estado "100": Houve Erro: Jogador perde uma vida
 				vidas <= vidas - 1;
 				--Próximo estado
 				estados <= "101";
 				
-			when "101" => --Verificação se o jogador perdeu: análise da quantidade de vidas do jogador
+			when "101" => --Estado "101": Verificação se o jogador perdeu: análise da quantidade de vidas do jogador
 				if (vidas = 0) then	 --Caso as vidas tenham acabado, o jogador perde; caso contrário, o jogo continua
 					gpsig(0) <= '1'; --Jogador perdeu, print de "Perdeu" no lcd
 					estados <= "000";
