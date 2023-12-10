@@ -56,12 +56,12 @@ architecture arq_LCD of LCD is
 Component forca is
     Port ( chute : in  STD_LOGIC_VECTOR (2 downto 0);    
            botao : in  STD_LOGIC;
-			  reset : in std_logic;
-			  clk   : in std_logic;
-			  vidasled: out std_logic_vector(2 downto 0);
-			  compfinal: out STD_LOGIC_VECTOR(4 downto 0);
-			  gp : out std_logic_vector(1 downto 0)
-			  );
+	   reset : in std_logic;
+	   clk   : in std_logic;
+	   vidasled: out std_logic_vector(2 downto 0);
+	   compfinal: out STD_LOGIC_VECTOR(4 downto 0);
+	   gp : out std_logic_vector(1 downto 0)
+	 );
 end component;
 begin
 
