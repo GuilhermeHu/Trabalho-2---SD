@@ -43,7 +43,7 @@ signal senha1: STD_LOGIC_VECTOR (2 downto 0) := "101";
 signal senha0: STD_LOGIC_VECTOR (2 downto 0) := "000";
 
 signal comp: STD_LOGIC_VECTOR(4 downto 0):= "00000";            --Vetor que contém quais posições da senha já foram acertadas pelo jogador (1 se já foi acertado, 0 caso ainda não)
-signal comp0,comp1,comp2,comp3,comp4, bait : STD_LOGIC := '0';  --Signals auxiliares que mostram quais posições da senha já foram acertadas, para composição do vetor comp
+signal comp0,comp1,comp2,comp3,comp4, bait : STD_LOGIC := '0';  --Signals auxiliares que apresentam qual posição da senha foi acertada em uma determinada rodada, para composição do vetor "comp". Ao fim da rodada, voltam para 0 para a próxima rodada
 signal estados: STD_LOGIC_VECTOR(2 downto 0):= "000";           --Estados do jogo. Sua codificação está abaixo* 
 signal vidas : integer range 3 downto 0 := 3;                   --Quantidade de vidas que o jogador possui: diminui em 1 a cada erro realizado
 signal gpsig : STD_LOGIC_VECTOR(1 downto 0):= "00"; 		--Signal de vetor de 2 elementos que apresenta condições para o fim de jogo: gp(1) = g = vitória, e gp(0) = p = derrota
@@ -63,7 +63,6 @@ BEGIN
 bait <= (comp0 OR comp1 OR comp2 OR comp3 OR comp4);     --verificação se o chute do jogador foi um acerto ou um erro (algum dos algarismos está certo) -> OR nos valores de cada comparação
 
 process(vidas)
-
 begin
 	if (vidas = 3) then            --Configuração das saídas de LED de acordo com a
 		vidasled <= "111";     --quantidade de vidas que o jogador possui: a
@@ -96,7 +95,7 @@ begin
 						comp0 <= '1';			   --esteja correto, seu respectivo signal virará
 					end if;					   --'1', para composição do vetor comp que diz
 					if (chute = senha1) then		   --quais posições da senha já foram acertadas
-						comp1 <= '1';
+						comp1 <= '1';			   --no jogo inteiro.
 					end if;
 					if (chute = senha2) then
 						comp2 <= '1';
@@ -158,7 +157,8 @@ begin
 	end if;
 end process;
 
-compfinal <= comp;
-gp <= gpsig;
-
+compfinal <= comp;	--Atribuição do signal "comp" ao vetor "compfinal", que será o output deste módulo, contendo as posições da senha já acertadas no jogo
+gp <= gpsig;		--Atribuição do signal "gpsig" ao vetor "gp", que será o output deste módulo, mostrando se alguma condição de fim de jogo tenha acontecido (vitória ou derrota)
+			--São esses vetores que entrarão no módulo do lcd como informações do jogo, para a realização do print na placa FPGA
+					
 END arq_forca;
