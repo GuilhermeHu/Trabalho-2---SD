@@ -339,7 +339,7 @@ forca_f: forca port map (chute,botao,reset,clkm,ledvidas,comp,gpsig);  --Chamada
 		nx_state <= ReturnHome;
  
 		
-		when   ReturnHome   =>
+		when   ReturnHome   =>		--Reinício dos ciclos dos estados
 		RS<=   '0';   RW<=  '0';
 		DB   <=  "10000000";
 		nx_state <= WriteDatal; 
