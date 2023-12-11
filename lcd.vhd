@@ -29,16 +29,20 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
+
+--Código-base retirado do vídeo "DISPLAY LCD DO KIT EE03 | Curso de FPGA #080" no Youtube, do canal L "WR Kits"
+--Link do vídeo: https://youtu.be/tbBiHPvzUIg?si=jQWMAsOxOqRG1Lmw
+
 entity LCD is
-generic (fclk: natural := 110_000_000); -- 50MHz , cristal do kit EE03
-		port (chute : in STD_LOGIC_VECTOR (2 downto 0);
-				botao : in STD_LOGIC;
-				reset : in STD_LOGIC;
-				clk   : in STD_LOGIC;
-				ledvidas:  out std_logic_vector(2 downto 0); 
-				RS, RW      : out bit;
-		     		E           : buffer bit;  
-		      		DB          : out bit_vector(7 downto 0)); 
+generic (fclk: natural := 110_000_000); -- 50MHz , cristal do kit EE03			--Alterador da frequência do clock
+		port (chute : in STD_LOGIC_VECTOR (2 downto 0);				--Entrada da forca: algarismo chutado pelo jogador (em binário)
+		      botao : in STD_LOGIC;						--Botão: confirmação do chute botado nos switchs (input), de modo a mandar o chute ao jogo
+		      reset : in STD_LOGIC;						--Botão de Reset: reinicia o jogo inteiro
+		      clk   : in STD_LOGIC;						--Entrada de clock
+		      ledvidas:  out std_logic_vector(2 downto 0); 			--Saída dos LEDS da placa FPGA, que serão proporcionais às vidas que o jogador possui
+		      RS, RW      : out bit;						--Saídas do lcd da placa FPGA, que definem se a memória 
+		      E           : buffer bit;  					
+		      DB          : out bit_vector(7 downto 0)); 
 end LCD;
 
 architecture arq_LCD of LCD is
