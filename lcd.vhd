@@ -229,7 +229,7 @@ forca_f: forca port map (chute,botao,reset,clkm,ledvidas,comp,gpsig);  --Chamada
 		else				--Por exemplo, nesse estado "WriteData2", caso a posição mais significativa do vetor "comp" esteja em nível alto,
 			DB <= X"2D"; -- _	--será printado o algarismo 7, que é o valor mais significativo da senha; caso contrário, será printado "_". Essa
 		end if;				--lógica foi aplicada dos estados "WriteData2" ao "WriteData6", para todos os cinco dígitos da senha.
-		nx_state <= WriteData3; 
+		nx_state <= WriteData3; 	--OBS: o valor recebido pelo databit (DB) segue uma codificação fornecida pelo manual da placa
 		
 		when WriteData3 =>
 		RS<= '1'; RW<= '0';
